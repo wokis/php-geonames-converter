@@ -2,6 +2,11 @@
 
 namespace Wokis\Geonames;
 
+/**
+ * Thrown when the converter function is called without setting a source first.
+ *
+ * @author Kacper <kacper@kacper.se>
+ */
 class NoSourceException extends \BadMethodCallException
 {
     /**

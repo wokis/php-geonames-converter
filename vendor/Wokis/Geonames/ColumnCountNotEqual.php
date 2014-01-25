@@ -2,6 +2,11 @@
 
 namespace Wokis\Geonames;
 
+/**
+ * Thrown when the number of columns in the source format and in the source file is not equal.
+ *
+ * @author Kacper <kacper@kacper.se>
+ */
 class ColumnCountNotEqual extends \RuntimeException
 {
     /**
