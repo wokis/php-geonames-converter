@@ -8,8 +8,8 @@ use Wokis\StdExceptions\FileOpenException;
 /**
  * Base class responsible for opening and reading a geonames dump file.
  *
- * @see http://download.geonames.org/export/dump/readme.txt
- * @see http://download.geonames.org/export/dump/
+ * @link http://download.geonames.org/export/dump/readme.txt
+ * @link http://download.geonames.org/export/dump/
  *
  * @author Kacper <kacper@kacper.se>
  */
@@ -19,11 +19,13 @@ abstract class GeonamesDumpSource
     abstract protected function preProcess();
     public $fileHandle;
 
-    
+
     /**
      * Constructor.
      *
      * @param string $filePath The file to open
+     * @throws \Wokis\StdExceptions\FileNotFoundException
+     * @throws \Wokis\StdExceptions\FileOpenException
      */
     public function __construct($filePath)
     {
