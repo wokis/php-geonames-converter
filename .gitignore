@@ -1,0 +1,6 @@
+.idea
+
+allCountries.txt
+dist/allCountries.json
+docs/
+sami.config.php
