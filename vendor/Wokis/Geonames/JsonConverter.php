@@ -3,6 +3,7 @@
 namespace Wokis\Geonames;
 
 use Wokis\StdExceptions\FileSaveException;
+use Wokis\Geonames\ColumnCountNotEqual;
 
 /**
  * Options for json_encode.
@@ -16,13 +17,17 @@ define('JSON_OPTIONS', JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE | JSON_PRETTY
 /**
  * Class that handles the conversion from a geonames dump source into the JSON format.
  *
- * @param string $outputFilePath The path to a file to write to
- * @return bool Returns true if things go well
- *
  * @author Kacper <kacper@kacper.se>
  */
 class JsonConverter extends AbstractConverter
 {
+    /**
+     * Check if a bitmask flag is set
+     *
+     * @param mixed $bitmask
+     * @param mixed $flag
+     * @return bool True if flag is set otherwise false
+     */
     private function isFlagSet($bitmask, $flag)
     {
         if (($bitmask & $flag) == $flag) {
@@ -32,6 +37,30 @@ class JsonConverter extends AbstractConverter
         return false;
     }
 
+    /**
+     * Remove EOL characters from a string
+     *
+     * @param string $string The string containing EOL characters
+     * @return string The string without EOL characters
+     */
+    private function removeEol($string)
+    {
+        $string = str_replace("\n", '', $string);
+        $string = str_replace("\r", '', $string);
+        $string = str_replace("\r\n", '', $string);
+
+        return $string;
+    }
+
+    /**
+     * Convert a GeonamesDumpSource into JSON line by line
+     *
+     * @param string $outputFilePath The path to a file to write to
+     * @throws ColumnCountNotEqual
+     * @throws \Wokis\StdExceptions\FileSaveException
+     * @throws NoSourceException
+     * @return bool Returns true if things go well
+     */
     public function convert($outputFilePath)
     {
         if (! $this->source instanceof GeonamesDumpSource) {
@@ -44,8 +73,17 @@ class JsonConverter extends AbstractConverter
 
         fwrite($handle, '[');
 
-        while (($line = fgetcsv($this->source->fileHandle, 0, "\t")) !== false) {
+        while (($line = fgets($this->source->fileHandle)) !== false) {
+
+            $line = $this->removeEol($line);
+
+            $line = explode("\t", $line);
+            
             $dataset = array_combine($this->source->columns(), $line);
+            
+            if ($dataset === false) {
+                throw new ColumnCountNotEqual(count($this->source->columns()), count($line));
+            }
 
             $json = json_encode($dataset, JSON_OPTIONS);
 
