@@ -15,7 +15,7 @@ abstract class AbstractConverter
     /**
      * Set geonames source object.
      *
-     * @param \Wokis\Goenames\GeonamesDumpSource $source The geonames source object
+     * @param GeonamesDumpSource $source The geonames source object
      */
     public function source(GeonamesDumpSource $source)
     {
