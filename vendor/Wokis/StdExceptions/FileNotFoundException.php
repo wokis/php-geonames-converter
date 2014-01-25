@@ -2,6 +2,11 @@
 
 namespace Wokis\StdExceptions;
 
+/**
+ * Thrown when a file can not be found
+ *
+ * @author Kacper <kacper@kacper.se>
+ */
 class FileNotFoundException extends \RuntimeException
 {
     /**

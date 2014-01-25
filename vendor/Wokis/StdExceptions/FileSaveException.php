@@ -2,6 +2,11 @@
 
 namespace Wokis\StdExceptions;
 
+/**
+ * Thrown when a file can not be saved
+ *
+ * @author Kacper <kacper@kacper.se>
+ */
 class FileSaveException extends \RuntimeException
 {
     /**

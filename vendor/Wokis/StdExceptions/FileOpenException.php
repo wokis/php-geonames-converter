@@ -2,6 +2,11 @@
 
 namespace Wokis\StdExceptions;
 
+/**
+ * Thrown when a file can not be opened
+ *
+ * @author Kacper <kacper@kacper.se>
+ */
 class FileOpenException extends \RuntimeException
 {
     /**
