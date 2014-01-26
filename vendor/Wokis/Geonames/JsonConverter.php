@@ -22,37 +22,6 @@ define('JSON_OPTIONS', JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE | JSON_PRETTY
 class JsonConverter extends AbstractConverter
 {
     /**
-     * Check if a bitmask flag is set
-     *
-     * @param mixed $bitmask
-     * @param mixed $flag
-     * @return bool True if flag is set otherwise false
-     */
-    private function isFlagSet($bitmask, $flag)
-    {
-        if (($bitmask & $flag) == $flag) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Remove EOL characters from a string
-     *
-     * @param string $string The string containing EOL characters
-     * @return string The string without EOL characters
-     */
-    private function removeEol($string)
-    {
-        $string = str_replace("\n", '', $string);
-        $string = str_replace("\r", '', $string);
-        $string = str_replace("\r\n", '', $string);
-
-        return $string;
-    }
-
-    /**
      * Convert a GeonamesDumpSource into JSON line by line
      *
      * @param string $outputFilePath The path to a file to write to
@@ -71,18 +40,19 @@ class JsonConverter extends AbstractConverter
             throw new FileSaveException($outputFilePath);
         }
 
+        $columns = $this->source->columns();
+
         fwrite($handle, '[');
 
         while (($line = fgets($this->source->fileHandle)) !== false) {
-
-            $line = $this->removeEol($line);
-
+            
+            $line = str_replace("\n", '', $line);
             $line = explode("\t", $line);
             
-            $dataset = array_combine($this->source->columns(), $line);
+            $dataset = array_combine($columns, $line);
             
             if ($dataset === false) {
-                throw new ColumnCountNotEqual(count($this->source->columns()), count($line));
+                throw new ColumnCountNotEqual(count($columns), count($line));
             }
 
             $json = json_encode($dataset, JSON_OPTIONS);
@@ -94,28 +64,31 @@ class JsonConverter extends AbstractConverter
              * When JSON_PRETTY_PRINT is set we add the necessary new line characters
              *  and intend as necessary.
              */
-            if ($this->isFlagSet(JSON_OPTIONS, JSON_PRETTY_PRINT)) {
+            if ((JSON_PRETTY_PRINT & JSON_OPTIONS) == JSON_PRETTY_PRINT) {
                 $prettyJson = "\n";
                
                 $jsonLines = explode("\n", $json);
 
                 foreach ($jsonLines as $line) {
                     $prettyJson .= '    ' . $line;
-                    if ($jsonLines[count($jsonLines) - 1] != $line) {
-                        $prettyJson .= "\n";
-                    }
+                    $prettyJson .= "\n";
                 }
+
+                // remove last new line character
+                $prettyJson = substr($prettyJson, 0, -1);
+
                 $json = $prettyJson;
             }
 
             fwrite($handle, $json);
             fwrite($handle, ',');
+
         }
 
         // revert the file pointer one byte to remove the last comma punctuation mark
         fseek($handle, -1, SEEK_CUR);
 
-        if ($this->isFlagSet(JSON_OPTIONS, JSON_PRETTY_PRINT)) {
+        if ((JSON_PRETTY_PRINT & JSON_OPTIONS) == JSON_PRETTY_PRINT) {
             fwrite($handle, "\n");
         }
 
